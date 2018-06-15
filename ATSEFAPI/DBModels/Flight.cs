@@ -8,6 +8,6 @@ namespace ATSEFAPI.DBModels
         public uint Id { get; set; }
         public string FlightNumber { get; set; }
         public string AircraftType { get; set; }
-        public string IssuedDate { get; set; }
+        public DateTimeOffset IssuedDate { get; set; }
     }
 }
