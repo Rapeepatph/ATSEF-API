@@ -58,6 +58,10 @@ namespace ATSEFAPI.Controllers
             {
                 return BadRequest(ModelState);
             }
+            else if (NameGroupProfileExists(value.Name))
+            {
+                return new StatusCodeResult(StatusCodes.Status409Conflict);
+            }
             try
             {
                 _context.GroupProfile.Add(value);
@@ -72,14 +76,68 @@ namespace ATSEFAPI.Controllers
         
         // PUT: api/GroupProfiles/5
         [HttpPut("{id}")]
-        public void PutGroupProfile(int id, [FromBody]string value)
+        public async Task<IActionResult> PutGroupProfile(int id, [FromBody]GroupProfile groupProfile)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            if (id != groupProfile.Id)
+            {
+                return BadRequest();
+            }
+
+            try
+            {
+                var existingActivate = await _context.GroupProfile.Where(x => x.Status == true).SingleOrDefaultAsync(); 
+                if(existingActivate != null && existingActivate.Id !=id)
+                {
+                    existingActivate.Status = false;
+                    _context.Entry(existingActivate).State = EntityState.Modified;
+                }
+                _context.Entry(groupProfile).State = EntityState.Modified;
+                await _context.SaveChangesAsync();
+            }
+            catch(Exception e)
+            {
+                throw e;
+            }
+            return NoContent();
         }
-        
-        // DELETE: api/ApiWithActions/5
+
+        // DELETE: api/GroupProfiles/5
         [HttpDelete("{id}")]
-        public void DeleteGroupProfile(int id)
+        public async Task<IActionResult> DeleteGroupProfile([FromRoute] uint id)
         {
+            var groupProfile = await _context.GroupProfile.SingleOrDefaultAsync(m => m.Id == id);
+            if (groupProfile == null)
+            {
+                return NotFound();
+            }
+            try
+            {
+                _context.GroupProfile.Remove(groupProfile);
+                await _context.SaveChangesAsync();
+            }
+            catch(Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+            try
+            {
+                var groupStatistics = await _context.GroupStatistic.Where(x => x.ProfileId == groupProfile.Id).ToListAsync();
+                _context.GroupStatistic.RemoveRange(groupStatistics);
+                await _context.SaveChangesAsync();
+            }
+            catch(Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+            return Ok(groupProfile);
+        }
+        private bool NameGroupProfileExists(string name)
+        {
+            return _context.GroupProfile.Any(e => e.Name == name);
         }
     }
 }

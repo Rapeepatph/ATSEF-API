@@ -79,7 +79,7 @@ namespace ATSEFAPI.Controllers
             {
                 var flightProfiles = new List<FlightGroupDetail>();
                 string constring = _iconfiguraton.GetSection("ConnectionStrings").GetSection("ATSEFEntities").Value;
-                string commandInput = "SELECT count(*),ARRIVAL,RUNWAY_HEADING,AIRCRAFT,SECOND_ENTRY_SECTOR,min(SECOND_TRAVEL_TIME),max(SECOND_TRAVEL_TIME),AVG(SECOND_TRAVEL_TIME), 40 as P20,48 as P80  FROM ATSEF_DB.FLIGHT_PROFILE where ARRIVAL = '" + airport + "' and ARRIVAL_TIME between '" + strtDate.ToString("yyyy-MM-dd",
+                string commandInput = "SELECT count(*),ARRIVAL,RUNWAY_HEADING,AIRCRAFT,SECOND_ENTRY_SECTOR,min(SECOND_TRAVEL_TIME),max(SECOND_TRAVEL_TIME),AVG(SECOND_TRAVEL_TIME),39 as P15, 40 as P20,48 as P80 ,50 as P85 FROM ATSEF_DB.FLIGHT_PROFILE where ARRIVAL = '" + airport + "' and ARRIVAL_TIME between '" + strtDate.ToString("yyyy-MM-dd",
                                 CultureInfo.InvariantCulture) + "' and '" + endDate.ToString("yyyy-MM-dd",
                                 CultureInfo.InvariantCulture) + "' group by AIRCRAFT,RUNWAY_HEADING,SECOND_ENTRY_SECTOR;";
 
@@ -105,8 +105,11 @@ namespace ATSEFAPI.Controllers
                                         Min = (long)reader["min(SECOND_TRAVEL_TIME)"],
                                         Max = (long)reader["max(SECOND_TRAVEL_TIME)"],
                                         Avg = (decimal)reader["AVG(SECOND_TRAVEL_TIME)"],
+                                        P15 = (long)reader["P15"],
                                         P20 = (long)reader["P20"],
-                                        P80 = (long)reader["P80"]
+                                        P80 = (long)reader["P80"],
+                                        P85 = (long)reader["P85"]
+
                                     };
                                     flightProfiles.Add(groupDetail);
                                 }

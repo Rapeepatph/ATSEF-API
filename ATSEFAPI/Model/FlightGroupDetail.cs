@@ -17,5 +17,7 @@ namespace ATSEFAPI.Model
         public decimal Avg { get; set; }
         public long P20 { get; set; }
         public long P80 { get; set; }
+        public long P15 { get; set; }
+        public long P85 { get; set; }
     }
 }
